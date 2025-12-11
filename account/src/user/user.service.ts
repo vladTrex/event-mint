@@ -1,11 +1,24 @@
 import { Injectable } from '@nestjs/common';
+import * as crypto from 'node:crypto';
+import * as argon from 'argon2';
+
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(private readonly userRepository: UserRepository) {}
+
+  async create(user: CreateUserDto): Promise<void> {
+    const salt = crypto.randomBytes(32);
+    const hash = await argon.hash(user.password, { salt });
+
+    await this.userRepository.createUser({
+      passwordHash: hash,
+      passwordSalt: salt.toString('hex'),
+      ...user,
+    });
   }
 
   findAll() {
@@ -17,6 +30,7 @@ export class UserService {
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
+    console.log(updateUserDto);
     return `This action updates a #${id} user`;
   }
 

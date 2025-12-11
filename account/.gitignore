@@ -1,9 +1,28 @@
-# compiled output
-/dist
-/node_modules
+# ============================
+# Node / NestJS / TypeScript
+# ============================
+node_modules/
+dist/
+build/
+.tmp/
+.temp/
+.cache/
+.esm-cache/
+*.tsbuildinfo
+
+# Compiled JS output (mono-repos sometimes)
+**/*.js
+**/*.js.map
+!src/**/*.js
+!src/**/*.js.map
+
+# Environment variables
+.env
+.env.*
+!.env.example
 
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 pnpm-debug.log*
@@ -11,15 +30,35 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# OS
+# ============================
+# TypeORM / Database
+# ============================
+/migration/**/*.js
+ormconfig.json
+ormconfig.js
+ormconfig.ts
+**/database.sqlite
+**/*.sqlite
+**/*.sqlite-journal
+
+# ============================
+# Testing
+# ============================
+coverage/
+.nyc_output/
+jest-coverage/
+test-report.xml
+
+# ============================
+# OS Files
+# ============================
 .DS_Store
+Thumbs.db
 
-# Tests
-/coverage
-/.nyc_output
-
-# IDEs and editors
-/.idea
+# ============================
+# IDEs / Editors
+# ============================
+.idea/
 .project
 .classpath
 .c9/
@@ -27,9 +66,26 @@ lerna-debug.log*
 .settings/
 *.sublime-workspace
 
-# IDE - VSCode
+# VSCode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# ============================
+# Docker
+# ============================
+Dockerfile~
+docker-compose.yml~
+.docker/
+docker-volume-data/
+
+# ============================
+# Misc
+# ============================
+*.local
+*.bak
+*.tmp
+*.swp
+*.lock
