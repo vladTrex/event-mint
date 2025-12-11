@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, plainToInstance } from 'class-transformer';
 import { IsString } from 'class-validator';
+import { UserEntity } from '../entities/user.entity';
 
-export class CreateUserDto {
+export class UserDto {
   @ApiProperty({
-    description: 'User identificator',
+    description: 'User identifier',
     required: true,
     type: String,
   })
@@ -22,20 +23,10 @@ export class CreateUserDto {
   login: string;
 
   @ApiProperty({
-    description: 'User Password',
+    description: 'User phone number',
     required: true,
     type: String,
   })
-  @Expose()
-  @IsString()
-  password: string;
-
-  @ApiProperty({
-    description: 'User phone',
-    required: true,
-    type: String,
-  })
-  @IsString()
   phone: string;
 
   @ApiProperty({
@@ -55,10 +46,15 @@ export class CreateUserDto {
   lastName: string;
 
   @ApiProperty({
-    description: 'User E-mail',
+    description: 'User e-mail address',
     required: true,
     type: String,
   })
-  @IsString()
   email: string;
+
+  constructor(entity: Partial<UserEntity>) {
+    return plainToInstance(UserDto, entity, {
+      excludeExtraneousValues: true,
+    });
+  }
 }
