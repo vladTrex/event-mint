@@ -43,4 +43,10 @@ export class UserEntity {
     comment: 'Password salt',
   })
   passwordSalt: string;
+
+  @Column('varchar', {
+    comment: 'User e-mail address',
+    nullable: false,
+  })
+  email: string;
 }

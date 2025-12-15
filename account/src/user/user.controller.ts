@@ -1,8 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiExtraModels } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { GetUsersFilterDto } from './dto/get-user-filter.dto';
+import { UserDto } from './dto/user.dto';
 
+@ApiExtraModels(GetUsersFilterDto)
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -13,8 +26,28 @@ export class UserController {
   }
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  @ApiOperation({ summary: 'Get all users with filters' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'List of users with pagination',
+    schema: {
+      type: 'object',
+      properties: {
+        items: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/UserDto' }
+        },
+        total: {
+          type: 'number',
+          example: 100
+        }
+      }
+    }
+  })
+  findAll(
+    @Query() getUserFilterDto: GetUsersFilterDto,
+  ): Promise<{ items: UserDto[]; total: number }> {
+    return this.userService.findAll(getUserFilterDto);
   }
 
   @Get(':id')
@@ -24,7 +57,7 @@ export class UserController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+    return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')

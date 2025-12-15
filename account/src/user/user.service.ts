@@ -5,6 +5,9 @@ import * as argon from 'argon2';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRepository } from './user.repository';
+import { GetUsersFilterDto } from './dto/get-user-filter.dto';
+import { UserDto } from './dto/user.dto';
+import { UserEntity } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
@@ -21,17 +24,22 @@ export class UserService {
     });
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll(
+    getUserFilterDto: GetUsersFilterDto,
+  ): Promise<{ items: UserDto[]; total: number }> {
+    const { items: users, total } =
+      await this.userRepository.findAndCount(getUserFilterDto);
+    const dtos = users.map((user: UserEntity) => new UserDto(user));
+
+    return { items: dtos, total };
   }
 
   findOne(id: number) {
     return `This action returns a #${id} user`;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    console.log(updateUserDto);
-    return `This action updates a #${id} user`;
+  update(id: string, updateUserDto: UpdateUserDto) {
+    return this.userRepository.updateUser({ userId: id, ...updateUserDto });
   }
 
   remove(id: number) {

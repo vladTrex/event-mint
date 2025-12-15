@@ -4,15 +4,6 @@ import { IsString } from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty({
-    description: 'User identificator',
-    required: true,
-    type: String,
-  })
-  @Expose()
-  @IsString()
-  userId: string;
-
-  @ApiProperty({
     description: 'User login',
     required: true,
     type: String,
@@ -35,6 +26,7 @@ export class CreateUserDto {
     required: true,
     type: String,
   })
+  @Expose()
   @IsString()
   phone: string;
 
@@ -43,6 +35,7 @@ export class CreateUserDto {
     required: true,
     type: String,
   })
+  @Expose()
   @IsString()
   firstName: string;
 
@@ -51,6 +44,7 @@ export class CreateUserDto {
     required: true,
     type: String,
   })
+  @Expose()
   @IsString()
   lastName: string;
 
@@ -59,6 +53,7 @@ export class CreateUserDto {
     required: true,
     type: String,
   })
+  @Expose()
   @IsString()
   email: string;
 }
