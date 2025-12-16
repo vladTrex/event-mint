@@ -5,6 +5,20 @@ psql -h localhost -p 5432 -U postgres
 \c account-db
 \dt
 ```
+Create User
+
+```
+curl -X POST http://localhost:3000/user \
+  -H "Content-Type: application/json" \
+  -d '{
+    "login": "johndoe",
+    "password": "securePassword123",
+    "phone": "79001110101",
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com"
+  }'
+```
 
 ## Installation
 

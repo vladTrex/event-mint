@@ -27,22 +27,22 @@ export class UserController {
 
   @Get()
   @ApiOperation({ summary: 'Get all users with filters' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'List of users with pagination',
     schema: {
       type: 'object',
       properties: {
         items: {
           type: 'array',
-          items: { $ref: '#/components/schemas/UserDto' }
+          items: { $ref: '#/components/schemas/UserDto' },
         },
         total: {
           type: 'number',
-          example: 100
-        }
-      }
-    }
+          example: 100,
+        },
+      },
+    },
   })
   findAll(
     @Query() getUserFilterDto: GetUsersFilterDto,
@@ -52,7 +52,7 @@ export class UserController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+    return this.userService.findOne(id);
   }
 
   @Patch(':id')
