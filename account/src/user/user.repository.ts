@@ -24,6 +24,10 @@ export class UserRepository {
     return this.userRepository.findOneBy({ userId });
   }
 
+  async findByLogin(login: string): Promise<UserEntity | undefined> {
+    return this.userRepository.findOneBy({ login });
+  }
+
   async updateUser(params: DeepPartial<UserEntity>): Promise<void> {
     await this.userRepository.update({ userId: params.userId }, params);
   }

@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import * as crypto from 'node:crypto';
 import * as argon from 'argon2';
+import * as crypto from 'node:crypto';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { SignInDto } from './dto/sign-in.dto';
 import { UserRepository } from './user.repository';
 import { GetUsersFilterDto } from './dto/get-user-filter.dto';
 import { UserDto } from './dto/user.dto';
@@ -44,5 +45,21 @@ export class UserService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  async verification({ login, password }: SignInDto): Promise<boolean> {
+    const user = await this.userRepository.findByLogin(login);
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const isValid = await argon.verify(user.passwordHash, password);
+
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    return true;
   }
 }

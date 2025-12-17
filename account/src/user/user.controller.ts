@@ -13,9 +13,10 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { GetUsersFilterDto } from './dto/get-user-filter.dto';
+import { SignInDto } from './dto/sign-in.dto';
 import { UserDto } from './dto/user.dto';
 
-@ApiExtraModels(GetUsersFilterDto)
+@ApiExtraModels(GetUsersFilterDto, SignInDto)
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -58,6 +59,11 @@ export class UserController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
+  }
+
+  @Get('/verification')
+  verification(@Query() signInDto: SignInDto): Promise<boolean> {
+    return this.userService.verification(signInDto);
   }
 
   @Delete(':id')
