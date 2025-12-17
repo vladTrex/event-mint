@@ -1,7 +1,8 @@
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { AxiosError } from 'axios';
 import {
   VerificationParams,
   GetUsersByFilterParams,
@@ -16,20 +17,43 @@ export class InternalAccountService {
   ) {}
 
   async verification(params: VerificationParams): Promise<boolean> {
-    const url = `${this.configService.get('ACCOUNT_SERVICE_URL')}/v1/user/verification`;
-    const response = await firstValueFrom(
-      this.httpService.get(url, { params }),
-    );
-    return response.data;
+    try {
+      const url = `${this.configService.get('ACCOUNT_SERVICE_URL')}/user/verification`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, { params }),
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          return false;
+        }
+        throw new HttpException(
+          error.response?.data?.message || 'Account service error',
+          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+      throw error;
+    }
   }
 
   async getUsersByFilter(
     params: GetUsersByFilterParams,
   ): Promise<GetUsersResponse> {
-    const url = `${this.configService.get('ACCOUNT_SERVICE_URL')}/v1/user/get-users-by-filter`;
-    const response = await firstValueFrom(
-      this.httpService.get(url, { params }),
-    );
-    return response.data;
+    try {
+      const url = `${this.configService.get('ACCOUNT_SERVICE_URL')}/user`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, { params }),
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new HttpException(
+          error.response?.data?.message || 'Account service error',
+          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+      throw error;
+    }
   }
 }

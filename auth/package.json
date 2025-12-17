@@ -27,6 +27,7 @@
     "@nestjs/swagger": "^7.1.13",
     "axios": "^1.13.2",
     "class-validator": "^0.14.3",
+    "ioredis": "^5.8.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"
   },

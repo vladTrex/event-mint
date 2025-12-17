@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: account-db
+    ports:
+      - "5132:5432"
+    environment:
+      POSTGRES_DB: account-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d account-db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: event-redis
+    platform: linux/arm64
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--requirepass", "redis"]
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    platform: linux/amd64
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: "local:redis:6379:0:redis"
+      HTTP_USER: admin
+      HTTP_PASSWORD: admin
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  redis-data:

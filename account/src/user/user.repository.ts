@@ -68,6 +68,12 @@ export class UserRepository {
       });
     }
 
+    if (params?.login) {
+      query.andWhere(`${alias}.login = :login`, {
+        login: params.login,
+      });
+    }
+
     // Paginate
     if (params?.take) {
       query.take(params.take);

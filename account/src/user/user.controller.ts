@@ -51,6 +51,11 @@ export class UserController {
     return this.userService.findAll(getUserFilterDto);
   }
 
+  @Get('verification')
+  verification(@Query() signInDto: SignInDto): Promise<boolean> {
+    return this.userService.verification(signInDto);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
@@ -59,11 +64,6 @@ export class UserController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
-  }
-
-  @Get('/verification')
-  verification(@Query() signInDto: SignInDto): Promise<boolean> {
-    return this.userService.verification(signInDto);
   }
 
   @Delete(':id')
