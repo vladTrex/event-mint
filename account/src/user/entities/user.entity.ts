@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Index, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({
   name: 'user',
@@ -17,6 +17,7 @@ export class UserEntity {
   })
   phone: string;
 
+  @Index()
   @Column('varchar', {
     comment: 'User login',
     nullable: false,
