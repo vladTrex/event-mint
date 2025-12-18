@@ -6,9 +6,15 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { DatabaseModule } from './database/database.module';
-
+import { MetricsModule } from './metrics/metrics.module';
 @Module({
-  imports: [UserModule, DatabaseModule, ConfigModule.forRoot(), RedisModule],
+  imports: [
+    UserModule,
+    DatabaseModule,
+    ConfigModule.forRoot(),
+    RedisModule,
+    MetricsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

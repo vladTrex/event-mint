@@ -50,6 +50,7 @@ export class UserDto {
     required: true,
     type: String,
   })
+  @Expose()
   email: string;
 
   constructor(entity: Partial<UserEntity>) {

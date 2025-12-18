@@ -24,7 +24,7 @@ export class AuthService {
   async login(params: SignInDto): Promise<JwtDto> {
     const isPasswordCorrect =
       await this.internalAccountService.verification(params);
-    console.log(isPasswordCorrect);
+
     if (!isPasswordCorrect) {
       throw new UnauthorizedException();
     }
