@@ -7,9 +7,10 @@ import { UserController } from './user.controller';
 import { UserRepository } from './user.repository';
 
 import { DatabaseModule } from '../database/database.module';
+import { RedisModule } from '../config/redis/redis.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity]), DatabaseModule],
+  imports: [TypeOrmModule.forFeature([UserEntity]), DatabaseModule, RedisModule],
   controllers: [UserController],
   providers: [UserService, UserRepository],
 })

@@ -1,6 +1,7 @@
 import * as argon from 'argon2';
 import * as crypto from 'node:crypto';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import Redis from 'ioredis';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -9,10 +10,14 @@ import { UserRepository } from './user.repository';
 import { GetUsersFilterDto } from './dto/get-user-filter.dto';
 import { UserDto } from './dto/user.dto';
 import { UserEntity } from './entities/user.entity';
+import { REDIS_TOKEN } from '../config/redis/redis.constant';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    @Inject(REDIS_TOKEN) private readonly redis: Redis,
+    private readonly userRepository: UserRepository,
+  ) {}
 
   async create(user: CreateUserDto): Promise<void> {
     const salt = crypto.randomBytes(32);
@@ -43,8 +48,11 @@ export class UserService {
     return this.userRepository.updateUser({ userId: id, ...updateUserDto });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    const user = await this.userRepository.findById(id);
+    await this.redis.del(user.login);
+
+    return this.userRepository.deleteUser(id);
   }
 
   async verification({ login, password }: SignInDto): Promise<boolean> {

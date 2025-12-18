@@ -21,25 +21,26 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async login(signInDto: SignInDto): Promise<JwtDto> {
-    const isPasswordValid =
-      await this.internalAccountService.verification(signInDto);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+  async login(params: SignInDto): Promise<JwtDto> {
+    const isPasswordCorrect =
+      await this.internalAccountService.verification(params);
+    console.log(isPasswordCorrect);
+    if (!isPasswordCorrect) {
+      throw new UnauthorizedException();
     }
 
-    const users = await this.internalAccountService.getUsersByFilter({
-      login: signInDto.login,
-    });
+    let userId = await this.redis.get(params.login);
 
-    if (users.total === 0) {
-      throw new UnauthorizedException('User not found');
+    if (!userId) {
+      const users = await this.internalAccountService.getUsersByFilter({
+        login: params.login,
+      });
+      userId = users.items[0].userId;
+
+      await this.redis.set(params.login, userId, 'PX', 86400);
     }
 
-    const payload = {
-      login: signInDto.login,
-      userId: users.items[0].userId,
-    };
+    const payload = { login: params.login, userId };
     const access = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_ACCESS_SECRET'),
       algorithm: this.configService.get('JWT_ALG'),
@@ -50,8 +51,11 @@ export class AuthService {
       algorithm: this.configService.get('JWT_ALG'),
       expiresIn: this.configService.get('JWT_REFRESH_EXP'),
     });
-    this.redis.set(users.items[0].userId, refresh);
-    return { access, refresh };
+
+    return {
+      access,
+      refresh,
+    };
   }
 
   async refreshToken(params: RefreshJwtDto): Promise<JwtDto> {
