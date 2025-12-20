@@ -1,4 +1,8 @@
 ### Micro Bank system
+```
+docker exec -it account-db bash
+psql -U postgres -d account-db
+```
 
 ```
 psql -h localhost -p 5432 -U postgres

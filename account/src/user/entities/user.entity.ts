@@ -3,6 +3,7 @@ import { Column, Index, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity({
   name: 'user',
 })
+@Index(['login', 'phone'])
 export class UserEntity {
   @PrimaryGeneratedColumn('uuid', {
     comment: 'User identifier',
