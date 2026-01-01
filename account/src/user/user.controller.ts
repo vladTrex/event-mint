@@ -16,7 +16,7 @@ import { GetUsersFilterDto } from './dto/get-user-filter.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { UserDto } from './dto/user.dto';
 
-@ApiExtraModels(GetUsersFilterDto, SignInDto)
+@ApiExtraModels(GetUsersFilterDto, SignInDto, UserDto)
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
