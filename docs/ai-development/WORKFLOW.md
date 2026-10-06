@@ -1,5 +1,9 @@
 # AI-Assisted Development Workflow
 
+Version: 1.0
+This workflow is intentionally lightweight.
+It will evolve through the Capture Learning stage after real feature implementations.
+
 ```
 Brief / Ticket
 → /story
@@ -12,7 +16,8 @@ Brief / Ticket
 → Implementation
 → Deslop / Ponytail
 → Code Review
-→ Capture Learning
+→ /capture-learning
+→ Capture Learning (report)
 ```
 
 ## Stages
@@ -26,7 +31,7 @@ Brief / Ticket
 | Implementation | Build exactly what the spec says | `.feature` + `spec.md` | code + tests |
 | Deslop / Ponytail | Simplify without changing behavior (rules in `CLAUDE.md`) | the diff | smaller diff |
 | Code Review | Verify code against `.feature` and `spec.md` | diff + both files | findings |
-| Capture Learning | Keep what was learned | review findings | reusable rules → `AGENTS.md`; feature decisions → `spec.md` |
+| Capture Learning (`/capture-learning`) | Improve the process for the next feature | `.feature`, `spec.md`, review findings, `AGENTS.md`, workflow and skills | report in chat; a human applies it: reusable rules → `AGENTS.md`, process → `WORKFLOW.md` / skills, feature decisions → `spec.md` |
 
 ## Rules
 
@@ -34,11 +39,12 @@ Brief / Ticket
 - `/story` drafts the `.feature`; only a human approves it. `/spec` never runs on a draft and never falls back to the brief. `spec.md` is written by a human or drafted by `/spec` on request, and approved by a human.
 - Code is never the specification. If code and spec disagree, fix one of them explicitly.
 - Open questions stay in the `.feature` / `spec.md` until a human resolves them.
+- `/capture-learning` only recommends. It never edits code, the feature implementation, or any file; a human applies the recommendations.
 - Deslop / Ponytail never weakens or reinterprets requirements.
 
 ## Where things live
 
 - Project-wide conventions → `AGENTS.md` (short).
-- Feature-specific files → `specs/<feature>/` (`<feature>.feature`, `spec.md`)
-- Briefs → `docs/briefs/<feature>.md`..
+- Feature-specific files → `specs/<feature>/` (`<feature>.feature`, `spec.md`).
+- Briefs → `docs/briefs/<feature>.md`.
 - Process → this file.
