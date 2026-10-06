@@ -54,6 +54,7 @@ npm run start:prod
 |--------|----------|-------------|
 | `POST` | `/api/auth/login` | Login and receive JWT tokens |
 | `POST` | `/api/auth/refresh/token` | Refresh access token |
+| `POST` | `/api/auth/logout` | End the session of the given refresh token (`204`) |
 
 ### Login
 

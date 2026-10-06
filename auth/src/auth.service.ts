@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
   Inject,
   Injectable,
@@ -12,6 +13,15 @@ import { InternalAccountService } from './internal/account/account.service';
 import { JwtDto, RefreshJwtDto } from './dto/jwt.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { REDIS_TOKEN } from './config/redis/redis.constant';
+type RefreshPayload = {
+  userId: string;
+  login: string;
+  sid: string;
+  exp: number;
+};
+
+const revokedKey = (sid: string) => `revoked:sid:${sid}`;
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -40,7 +50,7 @@ export class AuthService {
       await this.redis.set(params.login, userId, 'PX', 86400);
     }
 
-    const payload = { login: params.login, userId };
+    const payload = { login: params.login, userId, sid: randomUUID() };
     const access = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_ACCESS_SECRET'),
       algorithm: this.configService.get('JWT_ALG'),
@@ -59,17 +69,9 @@ export class AuthService {
   }
 
   async refreshToken(params: RefreshJwtDto): Promise<JwtDto> {
-    let jwtPayload: {
-      userId: string;
-      login: string;
-    };
+    const jwtPayload = this.verifyRefresh(params.refresh);
 
-    try {
-      jwtPayload = this.jwtService.verify(params.refresh, {
-        secret: this.configService.get('JWT_REFRESH_SECRET'),
-        algorithms: [this.configService.get('JWT_ALG')],
-      });
-    } catch (error: unknown) {
+    if (await this.redis.exists(revokedKey(jwtPayload.sid))) {
       throw new UnauthorizedException();
     }
 
@@ -83,7 +85,11 @@ export class AuthService {
       throw new NotFoundException('user not found');
     }
 
-    const payload = { login: users[0].login, userId: users[0].userId };
+    const payload = {
+      login: users[0].login,
+      userId: users[0].userId,
+      sid: jwtPayload.sid,
+    };
     const access = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_ACCESS_SECRET'),
       algorithm: this.configService.get('JWT_ALG'),
@@ -99,5 +105,35 @@ export class AuthService {
       access,
       refresh,
     };
+  }
+
+  async logout(params: RefreshJwtDto): Promise<void> {
+    const { sid, exp } = this.verifyRefresh(params.refresh);
+    const ttl = exp - Math.floor(Date.now() / 1000);
+
+    // ttl <= 0: the token expires this second, nothing left to revoke
+    if (ttl > 0) {
+      await this.redis.set(revokedKey(sid), '1', 'EX', ttl);
+    }
+  }
+
+  private verifyRefresh(token: string): RefreshPayload {
+    let payload: RefreshPayload;
+
+    try {
+      payload = this.jwtService.verify(token, {
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+        algorithms: [this.configService.get('JWT_ALG')],
+      });
+    } catch (error: unknown) {
+      throw new UnauthorizedException();
+    }
+
+    // tokens issued before sessions existed carry no sid
+    if (!payload.sid) {
+      throw new UnauthorizedException();
+    }
+
+    return payload;
   }
 }
