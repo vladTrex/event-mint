@@ -57,7 +57,7 @@ No new module, dependency or infrastructure.
 ## Technical Design
 
 1. **Session id.** In `login`: `const sid = randomUUID()` (`node:crypto`); payload becomes `{ login, userId, sid }`, signed into both tokens as today.
-2. **Refresh.** In `refreshToken`, after verify: if `jwtPayload.sid` is missing or `await redis.exists(revokedKey(jwtPayload.sid))` → `UnauthorizedException`. Do the check before the account lookup. New payload reuses `jwtPayload.sid`.
+2. **Refresh.** In `refreshToken`, after verify: if `jwtPayload.sid` is missing or `await redis.exists(revokedKey(jwtPayload.sid))` → `UnauthorizedException`. Do the check before the account lookup. New payload reuses `jwtPayload.sid`. Since `forgot-password`, the token must also carry `ep` and match the user's current epoch, see `specs/forgot-password/spec.md`.
 3. **Logout.** Verify the refresh JWT exactly as `refreshToken` does (extract this verify into one private method used by both, to avoid duplication). Compute remaining lifetime from `exp`: `ttl = exp - now` seconds. `redis.set(revokedKey(sid), '1', 'EX', ttl)`. Return nothing.
 4. **Key.** `revoked:sid:<sid>`. TTL equals the remaining refresh lifetime, so the key disappears when the token could no longer be refreshed anyway; no cleanup job.
 5. **Rotation note.** Every refresh token of a session carries the same `sid`, so logging out with any of them (latest or an older still-unexpired one) ends the whole session.
@@ -68,10 +68,10 @@ No new module, dependency or infrastructure.
 
 - Body: `{ "refresh": "<jwt>" }` (`RefreshJwtDto`, validated by the existing global `ValidationPipe`).
 - `204 No Content` on success, including repeated logout of the same session.
-- `401 Unauthorized` if the refresh token is invalid, expired, or carries no `sid`.
+- `401 Unauthorized` if the refresh token is invalid, expired, or carries no `sid` or no `ep` (the epoch itself is not compared on logout).
 - `400` on missing/non-string `refresh` (existing validation behavior).
 
-`POST /api/auth/refresh/token`: contract unchanged; additionally `401` for a revoked session or a token without `sid`.
+`POST /api/auth/refresh/token`: contract unchanged; additionally `401` for a revoked session, a token without `sid` or `ep`, or a stale `ep` (after a password reset).
 
 Redis: `SET revoked:sid:<sid> 1 EX <remaining seconds>`; `EXISTS revoked:sid:<sid>`.
 
@@ -89,8 +89,8 @@ Redis: `SET revoked:sid:<sid> 1 EX <remaining seconds>`; `EXISTS revoked:sid:<si
 
 - **Double logout:** `SET` with the new TTL; same result, `204`.
 - **Logout with an expired refresh token:** `401`; the session has already ended by expiry (assumption below).
-- **Tokens issued before deploy (no `sid`):** rejected with `401` on refresh and logout; users must log in again (decided).
-- **TTL ≤ 0:** cannot happen after a successful verify; `exp` is in the future.
+- **Tokens issued before deploy (no `sid`, and later no `ep`):** rejected with `401` on refresh and logout; users must log in again (decided).
+- **TTL ≤ 0:** the token expires this very second; logout succeeds without writing a revocation key (nothing left to revoke).
 - **Concurrent refresh and logout:** a refresh that passed the check just before logout may issue one last pair; its refresh token is still blocked afterwards since `sid` is the same. Acceptable.
 
 ## Verification

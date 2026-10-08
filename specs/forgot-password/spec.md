@@ -70,6 +70,8 @@ Mapping to scenarios:
 
 No new module, dependency or infrastructure. One DB migration.
 
+Specs to update: `specs/logout/spec.md` (refresh and logout now also require and check `ep`).
+
 ## Technical Design
 
 1. **Email lookup (`account`).** `GET /user?email=` adds `andWhere(alias.email = :email)` in `UserRepository.qb`, like `login`. The unique constraint creates the index, so the lookup is indexed and returns at most one user.
