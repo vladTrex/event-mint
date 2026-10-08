@@ -61,6 +61,7 @@ Before generating the specification:
 2. Read the approved `.feature` file.
 3. Inspect the existing implementation related to the feature.
 4. Reuse existing project patterns whenever possible.
+5. List the existing `specs/*/spec.md` whose behavior this feature changes (shared endpoints, tokens, data). Note them under **Affected Components** as "Specs to update" and update them in the same change, so specs do not drift from the code.
 
 Never design from assumptions if the repository already provides the answer.
 
