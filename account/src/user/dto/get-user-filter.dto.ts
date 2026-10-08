@@ -42,6 +42,16 @@ export class GetUsersFilterDto {
   readonly login?: string;
 
   @ApiProperty({
+    description: 'User e-mail to filter by',
+    type: String,
+    required: false,
+    example: 'john.doe@example.com',
+  })
+  @IsOptional()
+  @IsString()
+  readonly email?: string;
+
+  @ApiProperty({
     description: 'Number of records to take (pagination)',
     type: Number,
     required: false,

@@ -1,7 +1,16 @@
+import { ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 import { CheckExistUserParams, SearchUserParams } from './user.types';
 import { DeepPartial, Repository, SelectQueryBuilder } from 'typeorm';
+
+// Postgres unique_violation: the only unique column besides the PK is email
+const rejectDuplicate = (error: unknown): never => {
+  if ((error as { code?: string }).code === '23505') {
+    throw new ConflictException('Email already in use');
+  }
+  throw error;
+};
 
 export class UserRepository {
   constructor(
@@ -10,7 +19,7 @@ export class UserRepository {
   ) {}
 
   async createUser<T extends DeepPartial<UserEntity>>(entity: T): Promise<T> {
-    return this.userRepository.save(entity);
+    return this.userRepository.save(entity).catch(rejectDuplicate);
   }
 
   async findAndCount(
@@ -29,7 +38,9 @@ export class UserRepository {
   }
 
   async updateUser(params: DeepPartial<UserEntity>): Promise<void> {
-    await this.userRepository.update({ userId: params.userId }, params);
+    await this.userRepository
+      .update({ userId: params.userId }, params)
+      .catch(rejectDuplicate);
   }
 
   async checkExistUser(
@@ -71,6 +82,12 @@ export class UserRepository {
     if (params?.login) {
       query.andWhere(`${alias}.login = :login`, {
         login: params.login,
+      });
+    }
+
+    if (params?.email) {
+      query.andWhere(`${alias}.email = :email`, {
+        email: params.email,
       });
     }
 

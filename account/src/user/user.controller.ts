@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  HttpCode,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiExtraModels } from '@nestjs/swagger';
 import { UserService } from './user.service';
@@ -15,6 +16,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { GetUsersFilterDto } from './dto/get-user-filter.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { UserDto } from './dto/user.dto';
+import { SetPasswordDto } from './dto/set-password.dto';
 
 @ApiExtraModels(GetUsersFilterDto, SignInDto, UserDto)
 @Controller('user')
@@ -64,6 +66,12 @@ export class UserController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
+  }
+
+  @Patch(':id/password')
+  @HttpCode(204)
+  setPassword(@Param('id') id: string, @Body() dto: SetPasswordDto) {
+    return this.userService.setPassword(id, dto.password);
   }
 
   @Delete(':id')

@@ -49,6 +49,7 @@ export class UserEntity {
   @Column('varchar', {
     comment: 'User e-mail address',
     nullable: false,
+    unique: true,
   })
   email: string;
 }

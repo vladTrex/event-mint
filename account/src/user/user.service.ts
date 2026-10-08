@@ -1,7 +1,12 @@
 import * as argon from 'argon2';
 import * as crypto from 'node:crypto';
 import Redis from 'ioredis';
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -19,14 +24,28 @@ export class UserService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async create(user: CreateUserDto): Promise<void> {
+  private async hashPassword(password: string) {
     const salt = crypto.randomBytes(32);
-    const hash = await argon.hash(user.password, { salt });
+    const hash = await argon.hash(password, { salt });
 
+    return { passwordHash: hash, passwordSalt: salt.toString('hex') };
+  }
+
+  async create(user: CreateUserDto): Promise<void> {
     await this.userRepository.createUser({
-      passwordHash: hash,
-      passwordSalt: salt.toString('hex'),
+      ...(await this.hashPassword(user.password)),
       ...user,
+    });
+  }
+
+  async setPassword(userId: string, password: string): Promise<void> {
+    if (!(await this.userRepository.findById(userId))) {
+      throw new NotFoundException('User not found');
+    }
+
+    await this.userRepository.updateUser({
+      userId,
+      ...(await this.hashPassword(password)),
     });
   }
 

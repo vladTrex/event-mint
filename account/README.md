@@ -82,6 +82,7 @@ The service starts on http://localhost:9000. Migrations run automatically when `
 | `GET` | `/api/account/user/verification` | Verify login & password |
 | `GET` | `/api/account/user/:id` | Get user by ID |
 | `PATCH` | `/api/account/user/:id` | Update user |
+| `PATCH` | `/api/account/user/:id/password` | Set a new password (internal, used by auth) |
 | `DELETE` | `/api/account/user/:id` | Delete user |
 | `GET` | `/api/account/metrics` | Prometheus metrics |
 
