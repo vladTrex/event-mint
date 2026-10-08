@@ -55,6 +55,8 @@ npm run start:prod
 | `POST` | `/api/auth/login` | Login and receive JWT tokens |
 | `POST` | `/api/auth/refresh/token` | Refresh access token |
 | `POST` | `/api/auth/logout` | End the session of the given refresh token (`204`) |
+| `POST` | `/api/auth/password/forgot` | Request a password reset by email (`204`, same for unknown emails) |
+| `POST` | `/api/auth/password/reset` | Set a new password with a reset token (`204`, `400` for a bad token) |
 
 ### Login
 
@@ -85,6 +87,22 @@ curl -X POST http://localhost:9001/api/auth/refresh/token \
     "refresh": "<refresh-token>"
   }'
 ```
+
+### Password reset
+
+No email provider yet. Outside production the plain reset token is written to Redis (valid 15 min, single use):
+
+```bash
+curl -X POST http://localhost:9001/api/auth/password/forgot \
+  -H "Content-Type: application/json" -d '{"email": "john.doe@example.com"}'
+
+docker compose exec redis redis-cli -a redis GET dev:reset-token:<userId>
+
+curl -X POST http://localhost:9001/api/auth/password/reset \
+  -H "Content-Type: application/json" -d '{"token": "<token>", "password": "newPassword123"}'
+```
+
+A reset ends all sessions of the user: refresh tokens issued before it return `401`.
 
 ## Tests
 

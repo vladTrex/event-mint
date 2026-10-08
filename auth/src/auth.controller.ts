@@ -2,6 +2,7 @@ import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { JwtDto, RefreshJwtDto } from './dto/jwt.dto';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/password-reset.dto';
 
 @Controller()
 export class AuthController {
@@ -21,5 +22,17 @@ export class AuthController {
   @HttpCode(204)
   logout(@Body() dto: RefreshJwtDto): Promise<void> {
     return this.authService.logout(dto);
+  }
+
+  @Post('password/forgot')
+  @HttpCode(204)
+  forgotPassword(@Body() dto: ForgotPasswordDto): Promise<void> {
+    return this.authService.requestPasswordReset(dto);
+  }
+
+  @Post('password/reset')
+  @HttpCode(204)
+  resetPassword(@Body() dto: ResetPasswordDto): Promise<void> {
+    return this.authService.resetPassword(dto);
   }
 }

@@ -37,6 +37,21 @@ export class InternalAccountService {
     }
   }
 
+  async setPassword(userId: string, password: string): Promise<void> {
+    try {
+      const url = `${this.configService.get('ACCOUNT_SERVICE_URL')}/user/${userId}/password`;
+      await firstValueFrom(this.httpService.patch(url, { password }));
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new HttpException(
+          error.response?.data?.message || 'Account service error',
+          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+      throw error;
+    }
+  }
+
   async getUsersByFilter(
     params: GetUsersByFilterParams,
   ): Promise<GetUsersResponse> {

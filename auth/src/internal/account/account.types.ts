@@ -7,6 +7,7 @@ export type GetUsersByFilterParams = {
   userIds?: string[];
   phones?: string[];
   login?: string;
+  email?: string;
 };
 
 export type GetUsersResponse = {
